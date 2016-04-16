@@ -46,17 +46,19 @@ func (f *Fleet) Deploy(idx int, unitPath string) (err error) {
 	workPath = append(workPath, unitName)
 	unitPath = path.Join(workPath...)
 
-	f.FleetCmd("stop", unitName)
+	f.Cmd("stop", unitName)
 
 	if vargs.Destroy {
-		f.FleetCmd("destroy", unitName)
+		f.Cmd("destroy", unitName)
 	}
 
 	if !vargs.Stop {
-		if err := f.FleetCmd("start", unitPath); err != nil {
+		if err := f.Cmd("start", unitPath); err != nil {
 			log.Errorf("error starting unit %s", unitName)
 			os.Exit(1)
 		} else if err = f.CheckRunningUnit(unitName); err != nil {
+			log.Errorf("unit %s has not started within %d seconds, deploy failed, stopping unit", unitName, vargs.StartTimeout)
+			f.Cmd("stop", unitName)
 			os.Exit(1)
 		}
 	} else {
@@ -77,8 +79,12 @@ func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
 		for _, line := range strings.Split(output, "\n") {
 			if strings.Contains(line, unitName) {
 				lineSplit := strings.Fields(line)
-				if len(lineSplit) == 4 && lineSplit[3] == "running" {
-					log.Infof("unit %s marked as running and started successfully", unitName)
+				if len(lineSplit) == 4 && lineSplit[2] == "active" {
+					if lineSplit[3] == "running" {
+						log.Infof("unit %s marked as running and started successfully", unitName)
+					} else {
+						log.Warningf("unit %s marked as active but not running, status is %s", unitName, lineSplit[3])
+					}
 					return nil
 				}
 			}
@@ -89,7 +95,7 @@ func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
 }
 
 // Wrapper around execCmd to run fleetctl with arguments
-func (f *Fleet) FleetCmd(action, unitName string) (err error) {
+func (f *Fleet) Cmd(action, unitName string) (err error) {
 	cmd := Cmd{CmdName: "/bin/fleetctl", CmdArgs: append(fleetArgs, action, unitName)}
 	err = cmd.ExecCmd()
 	DroneSleep(vargs.Sleep)

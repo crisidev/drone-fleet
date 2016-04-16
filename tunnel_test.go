@@ -10,7 +10,7 @@ import (
 func TestParseTunnel(t *testing.T) {
 	testTunnel := "bastion.mydomain.com"
 	tunnel := Tunnel{Tunnel: testTunnel}
-	testTunnelSplit := tunnel.ParseTunnel()
+	testTunnelSplit := tunnel.Parse()
 	if testTunnelSplit[0] != fmt.Sprintf("--tunnel=%s", testTunnel) {
 		t.Fatalf("expected --tunnel=%s, got %s", testTunnel, testTunnelSplit[0])
 	}
@@ -18,7 +18,7 @@ func TestParseTunnel(t *testing.T) {
 	testTunnel = "bastion.mydomain.com"
 	testUser := "myuser"
 	tunnel = Tunnel{Tunnel: "myuser@bastion.mydomain.com"}
-	testTunnelSplit = tunnel.ParseTunnel()
+	testTunnelSplit = tunnel.Parse()
 	if testTunnelSplit[0] != fmt.Sprintf("--tunnel=%s", testTunnel) {
 		t.Fatalf("expected --tunnel=%s, got %s", testTunnel, testTunnelSplit[0])
 	}

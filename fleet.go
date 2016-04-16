@@ -53,12 +53,17 @@ func (f *Fleet) Deploy(idx int, unitPath string) (err error) {
 	}
 
 	if !vargs.Stop {
-		if err := f.Cmd("start", unitPath); err != nil {
+		err := f.Cmd("start", unitPath)
+		if err != nil {
 			log.Errorf("error starting unit %s", unitName)
-			os.Exit(1)
-		} else if err = f.CheckRunningUnit(unitName); err != nil {
-			log.Errorf("unit %s has not started within %d seconds, deploy failed, stopping unit", unitName, vargs.StartTimeout)
-			f.Cmd("stop", unitName)
+		} else {
+			err = f.CheckRunningUnit(unitName)
+			if err != nil {
+				log.Errorf("unit %s has not started within %d seconds, deploy failed, stopping unit", unitName, vargs.StartTimeout)
+				f.Cmd("stop", unitName)
+			}
+		}
+		if err != nil {
 			os.Exit(1)
 		}
 	} else {

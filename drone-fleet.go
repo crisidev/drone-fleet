@@ -121,7 +121,7 @@ func SetFleetConfig() {
 		} else {
 			vargs.Units = []string{fmt.Sprintf("%s.service", repo.Name)}
 		}
-		log.Info("parameter units not specified, defaulting to %s", vargs.Units[0])
+		log.Infof("parameter units not specified, defaulting to %s", vargs.Units[0])
 	}
 }
 

@@ -111,7 +111,12 @@ func SetFleetConfig() {
 
 	// In case no units are passed, use repo name as unit name
 	if vargs.Units == nil {
-		vargs.Units = []string{fmt.Sprintf(repo.Name, ".service")}
+		if vargs.Scale > 1 {
+			vargs.Units = []string{fmt.Sprintf("%s@.service", repo.Name)}
+		} else {
+			vargs.Units = []string{fmt.Sprintf("%s.service", repo.Name)}
+		}
+		log.Info("parameter units not specified, defaulting to %s", vargs.Units[0])
 	}
 }
 

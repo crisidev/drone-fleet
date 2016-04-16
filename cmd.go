@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os/exec"
 	"strings"
 	"sync"
@@ -17,29 +16,24 @@ func (c *Cmd) ExecCmd() (err error) {
 	c.Cmd = exec.Command(c.CmdName, c.CmdArgs...)
 	c.Wg = &sync.WaitGroup{}
 
-	cmdReader, err := c.CmdGetStdOutPipe()
+	outScanner, errScanner, err := c.CreatePipes()
 	if err != nil {
 		return err
 	}
-	outScanner := bufio.NewScanner(cmdReader)
-
-	cmdErrReader, err := c.CmdGetStdErrPipe()
-	if err != nil {
-		return err
-	}
-	errScanner := bufio.NewScanner(cmdErrReader)
 
 	c.Wg.Add(2)
-	go c.CmdLogOutput(outScanner)
-	go c.CmdLogError(errScanner)
+	go c.LogOutput(outScanner)
+	go c.LogError(errScanner)
 
-	err = c.CmdStart()
+	err = c.Cmd.Start()
 	if err != nil {
+		log.Errorf("error starting cmd %s: %s", c.Cmd.Args, err)
 		return err
 	}
 
-	err = c.CmdWait()
+	err = c.Cmd.Wait()
 	if err != nil {
+		log.Errorf("error waiting for cmd %s: %s", c.Cmd.Args, err)
 		return err
 	}
 
@@ -47,43 +41,35 @@ func (c *Cmd) ExecCmd() (err error) {
 	return nil
 }
 
-func (c *Cmd) CmdStart() (err error) {
-	err = c.Cmd.Start()
-	if err != nil {
-		log.Errorf("error starting cmd %s: %s", c.Cmd.Args, err)
-		return err
-	}
-	return nil
-}
-
-func (c *Cmd) CmdWait() (err error) {
-	err = c.Cmd.Wait()
-	if err != nil {
-		log.Errorf("error waiting for cmd %s: %s", c.Cmd.Args, err)
-		return err
-	}
-	return nil
-}
-
-func (c *Cmd) CmdGetStdErrPipe() (io.Reader, error) {
-	cmdErrReader, err := c.Cmd.StderrPipe()
-	if err != nil {
-		log.Errorf("error creating StderrPipe for cmd %s: %s", c.Cmd.Args, err)
-		return nil, err
-	}
-	return cmdErrReader, nil
-}
-
-func (c *Cmd) CmdGetStdOutPipe() (io.Reader, error) {
+func (c *Cmd) CreatePipes() (*bufio.Scanner, *bufio.Scanner, error) {
 	cmdReader, err := c.Cmd.StdoutPipe()
 	if err != nil {
 		log.Errorf("error creating StdoutPipe for cmd %s: %s", c.Cmd.Args, err)
-		return nil, err
+		return nil, nil, err
 	}
-	return cmdReader, nil
+	outScanner := bufio.NewScanner(cmdReader)
+
+	cmdErrReader, err := c.Cmd.StderrPipe()
+	if err != nil {
+		log.Errorf("error creating StderrPipe for cmd %s: %s", c.Cmd.Args, err)
+		return nil, nil, err
+	}
+	errScanner := bufio.NewScanner(cmdErrReader)
+	return outScanner, errScanner, nil
 }
 
-func (c *Cmd) CmdLogOutput(scanner *bufio.Scanner) {
+func (c *Cmd) ExecCmdOutput() (string, error) {
+	log.Debugf("running command %s %s", c.CmdName, strings.Join(c.CmdArgs, " "))
+	c.Cmd = exec.Command(c.CmdName, c.CmdArgs...)
+	output, err := c.Cmd.Output()
+	if err != nil {
+		log.Errorf("error getting output for cmd %s : %s", c.Cmd.Args, err)
+		return "", err
+	}
+	return string(output), nil
+}
+
+func (c *Cmd) LogOutput(scanner *bufio.Scanner) {
 	defer c.Wg.Done()
 
 	for scanner.Scan() {
@@ -95,7 +81,7 @@ func (c *Cmd) CmdLogOutput(scanner *bufio.Scanner) {
 	}
 }
 
-func (c *Cmd) CmdLogError(scanner *bufio.Scanner) {
+func (c *Cmd) LogError(scanner *bufio.Scanner) {
 	defer c.Wg.Done()
 
 	for scanner.Scan() {

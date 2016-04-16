@@ -130,7 +130,7 @@ func RunFleetDeploy(idx int, units []string) {
 		unitPath := path.Join(workspace.Path, unit)
 		if _, err := os.Stat(unitPath); err == nil {
 			fleet := Fleet{}
-			fleet.Deploy(0, unitPath)
+			fleet.Deploy(idx, unitPath)
 		} else {
 			log.Errorf("file %s not found", unitPath)
 			os.Exit(1)

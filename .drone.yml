@@ -23,7 +23,7 @@ publish:
     repo: hub.crisidev.org:5000/crisidev/drone-fleet
     tag:
       - latest
-      - "0.1"
+      - "0.2"
     insecure: true
     storage_driver: vfs
 

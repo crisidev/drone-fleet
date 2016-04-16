@@ -1,0 +1,11 @@
+[people]
+  [people.crisidev]
+    name = "Matteo Bigoi"
+    email = "bigo@crisidev.org"
+    login = "criside"
+
+[org]
+  [org.core]
+    people = [
+      "crisidev"
+    ]

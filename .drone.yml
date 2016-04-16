@@ -1,0 +1,37 @@
+build:
+  image: golang:1.6
+  environment:
+    - CGO_ENABLED=0
+  commands:
+    - make deps
+    - make vet
+    - make build
+    - make test
+
+publish:
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: crisidev/drone-fleet
+    tag:
+      - latest
+      - "0.1"
+    storage_driver: vfs
+  docker:
+    registry: hub.crisidev.org:5000
+    repo: hub.crisidev.org:5000/crisidev/drone-fleet
+    tag:
+      - latest
+      - "0.1"
+    insecure: true
+    storage_driver: vfs
+
+plugin:
+  name: Fleet
+  desc: Deploy on CoreOS clusters using fleet
+  type: deploy
+  image: crisidev/drone-fleet
+  labels:
+    - deploy
+    - fleet

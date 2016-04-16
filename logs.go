@@ -6,7 +6,7 @@ import (
 	"github.com/op/go-logging"
 )
 
-func logSetup(debug bool) {
+func LogSetup(debug bool) {
 	logFormat := logging.MustStringFormatter(`%{color}%{level:-7.7s} %{shortfunc:-15.15s} %{color:reset} %{message}`)
 	outBackend := logging.NewLogBackend(os.Stderr, "", 0)
 	outBackendFormatter := logging.NewBackendFormatter(outBackend, logFormat)

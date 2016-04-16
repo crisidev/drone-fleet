@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func (t *Tunnel) HandleTunnel() (args []string) {
-	args = t.ParseTunnel()
+func (t *Tunnel) Handle() (args []string) {
+	args = t.Parse()
 	t.CreateSSHDir()
 	if err := t.WriteSSHKey(); err != nil {
 		os.Exit(1)
@@ -32,7 +32,7 @@ func (t *Tunnel) HandleTunnel() (args []string) {
 	return args
 }
 
-func (t *Tunnel) ParseTunnel() []string {
+func (t *Tunnel) Parse() []string {
 	tunnelSplit := strings.Split(t.Tunnel, "@")
 	if len(tunnelSplit) == 1 {
 		return []string{fmt.Sprintf("--tunnel=%s", t.Tunnel)}

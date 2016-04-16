@@ -12,6 +12,7 @@ type Params struct {
 	Units        []string `json:"units"`
 	Scale        int      `json:"scale"`
 	Timeout      int      `json:"timeout"`
+	StartTimeout int      `json:"start_timeout"`
 	Sleep        int      `json:"sleep"`
 	RollingSleep int      `json:"rolling_sleep"`
 	Destroy      bool     `json:"destroy"`

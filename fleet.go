@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 // Takes in input a file path, split it and return the file name
@@ -34,7 +35,7 @@ func (f *Fleet) HandleScalableUnit(idx int, unitName string) (string, error) {
 	return "", errors.New("scaled unit wrong file name")
 }
 
-func (f *Fleet) FleetDeploy(idx int, unitPath string) (err error) {
+func (f *Fleet) Deploy(idx int, unitPath string) (err error) {
 	unitName, workPath := f.SplitUnitPath(unitPath)
 	if vargs.Scale > 1 {
 		unitName, err = f.HandleScalableUnit(idx, unitName)
@@ -55,6 +56,9 @@ func (f *Fleet) FleetDeploy(idx int, unitPath string) (err error) {
 		if err := f.FleetCmd("start", unitPath); err != nil {
 			log.Errorf("error starting unit %s", unitName)
 			os.Exit(1)
+		} else if err = f.CheckRunningUnit(unitName); err != nil {
+			log.Errorf("unit %s has not started within %d seconds, deploy failed, stopping unit", unitName, vargs.StartTimeout)
+			os.Exit(1)
 		}
 	} else {
 		log.Critical("requested emergency stop")
@@ -63,10 +67,32 @@ func (f *Fleet) FleetDeploy(idx int, unitPath string) (err error) {
 	return nil
 }
 
+func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
+	log.Info("checking for %d seconds if unit %s is started successfully", vargs.StartTimeout, unitName)
+	for idx := 0; idx <= vargs.StartTimeout; idx += 30 {
+		cmd := Cmd{CmdName: "/bin/fleetctl", CmdArgs: append(fleetArgs, "list-units")}
+		output, err := cmd.ExecCmdOutput()
+		if err != nil {
+			return err
+		}
+		for _, line := range strings.Split(output, "\n") {
+			if strings.Contains(line, unitName) {
+				lineSplit := strings.Fields(line)
+				if len(lineSplit) == 4 && lineSplit[3] == "running" {
+					log.Info("unit %s marked as running and started successfully", unitName)
+					return nil
+				}
+			}
+		}
+		time.Sleep(time.Second * 30)
+	}
+	return errors.New("time excedeed")
+}
+
 // Wrapper around execCmd to run fleetctl with arguments
-func (f *Fleet) FleetCmd(action, unitName string) error {
+func (f *Fleet) FleetCmd(action, unitName string) (err error) {
 	cmd := Cmd{CmdName: "/bin/fleetctl", CmdArgs: append(fleetArgs, action, unitName)}
-	err := cmd.ExecCmd()
+	err = cmd.ExecCmd()
 	DroneSleep(vargs.Sleep)
 	return err
 }

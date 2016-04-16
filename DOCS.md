@@ -18,6 +18,7 @@ deploy:
     rolling_sleep: 120
     destroy: false
     stop: true
+    start_timeout: 120
 ```
 
 ## Parameters
@@ -28,11 +29,13 @@ Mandatory parameters are <u>underlined</u>
 * <b>units:</b> list of unit files to run on the cluster, files need to exist in the git repository, default repository name
 * <b>scale:</b> number of instances of units you want to start (see [rolling update notes](DOCS.md#rolling-update)), default 1
 * <b>tunnel:</b> create a SSH tunnel to reach the etcd cluster (see [tunneling notes](DOCS.md#tunneling)), default empty
+* <b>tunnel:</b> create a SSH tunnel to reach the etcd cluster (see [tunneling notes](DOCS.md#tunneling)), default empty
 * <b>destroy:</b> destroy units during update (see [deploy method notes](DOCS.md#deploy-method)), default false
 * <b>stop:</b> do not start units during update (see [deploy method notes](DOCS.md#deploy-method)), default false
 * <b>sleep:</b> fleetctl commands timeout in seconds, default 5
 * <b>rolling_sleep:</b> timeout between every instances deploy for scaled units, default 120
 * <b>timeout:</b> sleep seconds between fleetctl commands, default 10
+* <b>start_timeout:</b> max seconds a unit can take to start, default 60
 
 ## Notes
 ### Deploy Method

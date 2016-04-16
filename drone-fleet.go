@@ -13,7 +13,7 @@ import (
 
 const (
 	APP_NAME    = "docker-fleet"
-	APP_VERSION = "0.1"
+	APP_VERSION = "0.2"
 	APP_SITE    = "https://github.com/crisidev/docker-fleet"
 	sshDir      = "/root/.ssh"
 )
@@ -38,7 +38,7 @@ func main() {
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	logSetup(vargs.Debug)
+	LogSetup(vargs.Debug)
 	log.Noticef("drone fleet scheduler deploy plugin, version %s", APP_VERSION)
 	log.Noticef("deploying repo %s on %s (drone version %s)", repo.Name, system.Link, system.Version)
 	log.Debugf("workspace path is %s", workspace.Path)
@@ -86,7 +86,7 @@ func SetFleetArgs() (args []string) {
 	if vargs.Tunnel != "" {
 		log.Infof("tunnel specified, using SSH to %s", vargs.Tunnel)
 		tunnel = &Tunnel{Tunnel: vargs.Tunnel, Key: workspace.Keys.Private, SSHDir: sshDir}
-		fleetArgs = append(fleetArgs, tunnel.HandleTunnel()...)
+		fleetArgs = append(fleetArgs, tunnel.Handle()...)
 	}
 
 	return args
@@ -99,6 +99,10 @@ func SetFleetConfig() {
 
 	if vargs.Timeout == 0 {
 		vargs.Timeout = 10
+	}
+
+	if vargs.StartTimeout == 0 {
+		vargs.StartTimeout = 60
 	}
 
 	if vargs.Sleep == 0 {
@@ -126,7 +130,7 @@ func RunFleetDeploy(idx int, units []string) {
 		unitPath := path.Join(workspace.Path, unit)
 		if _, err := os.Stat(unitPath); err == nil {
 			fleet := Fleet{}
-			fleet.FleetDeploy(0, unitPath)
+			fleet.Deploy(0, unitPath)
 		} else {
 			log.Errorf("file %s not found", unitPath)
 			os.Exit(1)

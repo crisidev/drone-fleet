@@ -57,7 +57,6 @@ func (f *Fleet) Deploy(idx int, unitPath string) (err error) {
 			log.Errorf("error starting unit %s", unitName)
 			os.Exit(1)
 		} else if err = f.CheckRunningUnit(unitName); err != nil {
-			log.Errorf("unit %s has not started within %d seconds, deploy failed, stopping unit", unitName, vargs.StartTimeout)
 			os.Exit(1)
 		}
 	} else {
@@ -68,7 +67,7 @@ func (f *Fleet) Deploy(idx int, unitPath string) (err error) {
 }
 
 func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
-	log.Info("checking for %d seconds if unit %s is started successfully", vargs.StartTimeout, unitName)
+	log.Infof("checking every 30 seconds if unit %s is started successfully, timeout %d", unitName, vargs.StartTimeout)
 	for idx := 0; idx <= vargs.StartTimeout; idx += 30 {
 		cmd := Cmd{CmdName: "/bin/fleetctl", CmdArgs: append(fleetArgs, "list-units")}
 		output, err := cmd.ExecCmdOutput()
@@ -79,7 +78,7 @@ func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
 			if strings.Contains(line, unitName) {
 				lineSplit := strings.Fields(line)
 				if len(lineSplit) == 4 && lineSplit[3] == "running" {
-					log.Info("unit %s marked as running and started successfully", unitName)
+					log.Infof("unit %s marked as running and started successfully", unitName)
 					return nil
 				}
 			}

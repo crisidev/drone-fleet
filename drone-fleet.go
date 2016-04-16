@@ -24,11 +24,11 @@ var (
 	vargs     *Params
 	workspace *drone.Workspace
 	tunnel    *Tunnel
+	repo      *drone.Repo
 )
 
 func main() {
-	// system and repo are used only in main
-	repo := drone.Repo{}
+	// system is used only in main
 	system := drone.System{}
 
 	// load json from stdin and parse it into variables
@@ -65,6 +65,7 @@ func RunFleetPlugin() {
 		}
 	}
 
+	log.Noticef("deploy of repo %s succeded", repo.Name)
 	os.Exit(0)
 }
 

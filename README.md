@@ -19,8 +19,7 @@ make test
 ### Example
 
 ```sh
-$ go build
-$ ./drone-fleet <<EOF
+$ ./build/drone-fleet <<EOF
 {
     "repo": {
         "clone_url": "git://github.com/drone/drone",

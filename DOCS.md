@@ -25,7 +25,7 @@ Mandatory parameters are <u>underlined</u>
 
 * <u><b>image:</b></u> drone-fleet plugin docker image
 * <u><b>endpoint:</b></u> etcd endpoint for fleetctl commands
-* <u><b>units:</b></u> list of unit files to run on the cluster, files need to exist in the git repository
+* <b>units:</b> list of unit files to run on the cluster, files need to exist in the git repository, default repository name
 * <b>scale:</b> number of instances of units you want to start (see [rolling update notes](DOCS.md#rolling-update)), default 1
 * <b>tunnel:</b> create a SSH tunnel to reach the etcd cluster (see [tunneling notes](DOCS.md#tunneling)), default empty
 * <b>destroy:</b> destroy units during update (see [deploy method notes](DOCS.md#deploy-method)), default false

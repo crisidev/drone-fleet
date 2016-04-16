@@ -108,13 +108,17 @@ func SetFleetConfig() {
 	if vargs.RollingSleep == 0 {
 		vargs.RollingSleep = 120
 	}
+
+	// In case no units are passed, use repo name as unit name
+	if vargs.Units == nil {
+		vargs.Units = []string{fmt.Sprintf(repo.Name, ".service")}
+	}
 }
 
 // Build a valid unit path, check the existence of the unit file and call the deploy function
 func RunFleetDeploy(idx int, units []string) {
 	for _, unit := range units {
 		unitPath := path.Join(workspace.Path, unit)
-		log.Info(unitPath)
 		if _, err := os.Stat(unitPath); err == nil {
 			fleet := Fleet{}
 			fleet.FleetDeploy(0, unitPath)

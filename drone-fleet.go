@@ -76,8 +76,13 @@ func SetFleetArgs() (args []string) {
 	}
 
 	if vargs.Endpoint == "" {
-		log.Error("etcd endpoint is mandatory, please add it to .drone.yml")
-		os.Exit(1)
+		endpoint := os.Getenv("DRONE_ETCD_ENDPOINT")
+		if endpoint == "" {
+			log.Error("etcd endpoint is mandatory, please add it to .drone.yml or via env variable DRONE_ETCD_ENDPOINT")
+			os.Exit(1)
+		} else {
+			vargs.Endpoint = endpoint
+		}
 	} else {
 		log.Infof("using etcd endpoint %s", vargs.Endpoint)
 		args = append(args, fmt.Sprintf("--endpoint=%s", vargs.Endpoint))

@@ -84,11 +84,13 @@ func (f *Fleet) CheckRunningUnit(unitName string) (err error) {
 		for _, line := range strings.Split(output, "\n") {
 			if strings.Contains(line, unitName) {
 				lineSplit := strings.Fields(line)
-				if len(lineSplit) == 4 && lineSplit[2] == "active" {
-					if lineSplit[3] == "running" {
-						log.Infof("unit %s marked as running and started successfully", unitName)
-					} else {
-						log.Warningf("unit %s marked as active but not running, status is %s", unitName, lineSplit[3])
+				if len(lineSplit) == 4 {
+					if lineSplit[2] == "active" || lineSplit[2] == "inactive" {
+						if lineSplit[3] == "running" {
+							log.Infof("unit %s marked as running and started successfully", unitName)
+						} else {
+							log.Warningf("unit %s marked as not running, status is %s/%s", unitName, lineSplit[2], lineSplit[3])
+						}
 					}
 					return nil
 				}

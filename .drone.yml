@@ -16,7 +16,7 @@ publish:
     repo: crisidev/drone-fleet
     tag:
       - latest
-      - "0.1"
+      - "0.2"
     storage_driver: vfs
   docker:
     registry: hub.crisidev.org:5000

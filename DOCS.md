@@ -81,3 +81,6 @@ SSH agent socket is read from the stdout of the executed command. If the output 
 
 ### Find a solution for rolling-back fleet deploy
 This will need to have an associated git workflow and deploy using proper and automatic versioning.
+
+### Integrate with drone 0.5
+Drone 0.5 is close to release and it will change a lot of stuff.
